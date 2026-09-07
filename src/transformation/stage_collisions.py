@@ -35,6 +35,7 @@ FIELDS_TO_DECODE = [
     "light_conditions",
     "road_surface_conditions",
     "urban_or_rural_area",
+    "local_authority_ons_district",
 ]
 
 logging.basicConfig(

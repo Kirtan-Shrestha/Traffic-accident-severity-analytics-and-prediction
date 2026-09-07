@@ -113,7 +113,7 @@ def build_dim_weather(df: pd.DataFrame) -> pd.DataFrame:
 
 def build_dim_location(df: pd.DataFrame) -> pd.DataFrame:
     dim = df[["latitude", "longitude", "lat_grid", "lon_grid",
-              "local_authority_district", "police_force", "urban_or_rural_area_label"]].drop_duplicates(
+              "local_authority_ons_district_label", "police_force", "urban_or_rural_area_label"]].drop_duplicates(
         subset=["latitude", "longitude"]
     ).reset_index(drop=True)
     dim.columns = ["latitude", "longitude", "lat_grid", "lon_grid",
