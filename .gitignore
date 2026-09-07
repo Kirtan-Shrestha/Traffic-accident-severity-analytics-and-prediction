@@ -1,0 +1,10 @@
+.env
+data/raw/
+data/staging/
+data/cleaned/
+data/rejected/
+__pycache__/
+*.pyc
+venv/
+.venv/
+logs/*.log
