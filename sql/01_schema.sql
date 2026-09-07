@@ -10,7 +10,7 @@ CREATE EXTENSION IF NOT EXISTS postgis;
 -- DIM_DATE
 -- ---------------------------------------------------------
 CREATE TABLE IF NOT EXISTS dim_date (
-    date_key        INTEGER PRIMARY KEY,        -- YYYYMMDD
+    date_key        INTEGER PRIMARY KEY,        -- YYYYMMDDHH
     full_date       DATE NOT NULL,
     year            SMALLINT NOT NULL,
     month           SMALLINT NOT NULL,
@@ -33,19 +33,15 @@ CREATE TABLE IF NOT EXISTS dim_road (
 );
 
 -- ---------------------------------------------------------
--- DIM_WEATHER
+-- DIM_WEATHER (categorical only - kept low-cardinality)
 -- ---------------------------------------------------------
 CREATE TABLE IF NOT EXISTS dim_weather (
-    weather_key             SERIAL PRIMARY KEY,
-    weather_conditions_code SMALLINT,
+    weather_key              SERIAL PRIMARY KEY,
+    weather_conditions_code  SMALLINT,
     weather_conditions_label VARCHAR(50),
-    temperature_2m          NUMERIC(5,2),
-    precipitation           NUMERIC(6,2),
-    rain                    NUMERIC(6,2),
-    snowfall                NUMERIC(6,2),
-    cloud_cover             NUMERIC(5,2),
-    wind_speed_10m          NUMERIC(6,2),
-    relative_humidity_2m    NUMERIC(5,2)
+    temperature_band         VARCHAR(20),
+    precipitation_level      VARCHAR(20),
+    UNIQUE (weather_conditions_code, temperature_band, precipitation_level)
 );
 
 -- ---------------------------------------------------------
@@ -77,15 +73,19 @@ CREATE TABLE IF NOT EXISTS dim_severity (
 -- FACT_ACCIDENT
 -- ---------------------------------------------------------
 CREATE TABLE IF NOT EXISTS fact_accident (
-    accident_key        SERIAL PRIMARY KEY,
-    collision_index      VARCHAR(20) UNIQUE NOT NULL,
-    date_key             INTEGER REFERENCES dim_date(date_key),
-    road_key             INTEGER REFERENCES dim_road(road_key),
-    weather_key          INTEGER REFERENCES dim_weather(weather_key),
-    location_key         INTEGER REFERENCES dim_location(location_key),
-    severity_key         INTEGER REFERENCES dim_severity(severity_key),
-    number_of_vehicles   SMALLINT,
-    number_of_casualties SMALLINT
+    accident_key         SERIAL PRIMARY KEY,
+    collision_index       VARCHAR(20) UNIQUE NOT NULL,
+    date_key              INTEGER REFERENCES dim_date(date_key),
+    road_key              INTEGER REFERENCES dim_road(road_key),
+    weather_key           INTEGER REFERENCES dim_weather(weather_key),
+    location_key          INTEGER REFERENCES dim_location(location_key),
+    severity_key          INTEGER REFERENCES dim_severity(severity_key),
+    number_of_vehicles    SMALLINT,
+    number_of_casualties  SMALLINT,
+    temperature_2m        NUMERIC(5,2),
+    precipitation         NUMERIC(6,2),
+    wind_speed_10m        NUMERIC(6,2),
+    relative_humidity_2m  NUMERIC(5,2)
 );
 
 -- Indexes for common analytical query patterns
