@@ -61,7 +61,19 @@ def prepare_splits(df: pd.DataFrame):
 
     return splits, feature_cols
 
-
+def get_raw_splits(df: pd.DataFrame):
+    """
+    Returns the un-encoded feature splits (categoricals still as plain
+    strings) -- the shape a real inference request arrives in -- paired
+    with AccidentSeverityPipeline for end-to-end validation of the
+    packaged inference pipeline against the training-time encoding.
+    """
+    cols = CATEGORICAL_COLS + NUMERIC_COLS
+    splits = {}
+    for split_name in ["train", "validation", "test"]:
+        subset = df[df["split"] == split_name]
+        splits[split_name] = (subset[cols], subset[TARGET_COL])
+    return splits
 if __name__ == "__main__":
     df = load_features()
     print(f"Loaded {len(df)} rows")
