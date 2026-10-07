@@ -45,6 +45,10 @@ def prepare_splits(df: pd.DataFrame):
 
     # One-hot encode categoricals, fit on full data so train/val/test share columns
     df_encoded = pd.get_dummies(df, columns=CATEGORICAL_COLS, drop_first=False)
+    # Cast one-hot columns to float - bool dtype causes a native memory access
+    # violation in LightGBM on Windows when mixed with float columns.
+    bool_cols = df_encoded.select_dtypes(include="bool").columns
+    df_encoded[bool_cols] = df_encoded[bool_cols].astype(float)
     feature_cols = [c for c in df_encoded.columns if c not in
                      ["accident_key", "collision_index", TARGET_COL, "split"]]
 

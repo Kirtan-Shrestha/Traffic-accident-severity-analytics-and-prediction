@@ -10,11 +10,8 @@ import mlflow
 import mlflow.sklearn
 import numpy as np
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import (
-    classification_report, recall_score, f1_score, confusion_matrix,
-)
-
 from src.ml.data_prep import load_features, prepare_splits
+from src.ml.eval_utils import evaluate
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
@@ -22,22 +19,6 @@ logger = logging.getLogger(__name__)
 mlflow.set_tracking_uri("http://localhost:5000")
 mlflow.set_experiment("accident_severity_classification")
 
-
-def evaluate(model, X, y, split_name: str) -> dict:
-    y_pred = model.predict(X)
-    macro_f1 = f1_score(y, y_pred, average="macro")
-    macro_recall = recall_score(y, y_pred, average="macro")
-    fatal_recall = recall_score(y, y_pred, labels=["Fatal"], average="macro")
-
-    logger.info(f"\n--- {split_name} ---")
-    logger.info(f"\n{classification_report(y, y_pred)}")
-    logger.info(f"Confusion matrix:\n{confusion_matrix(y, y_pred, labels=['Fatal', 'Serious', 'Slight'])}")
-
-    return {
-        f"{split_name}_macro_f1": macro_f1,
-        f"{split_name}_macro_recall": macro_recall,
-        f"{split_name}_fatal_recall": fatal_recall,
-    }
 
 
 def main():
