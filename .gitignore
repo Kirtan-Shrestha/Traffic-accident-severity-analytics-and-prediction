@@ -11,3 +11,5 @@ logs/*.log
 airflow/logs/
 airflow/config/
 airflow/.env
+
+mlruns/

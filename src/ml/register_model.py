@@ -20,7 +20,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(me
 logger = logging.getLogger(__name__)
 
 mlflow.set_tracking_uri("http://localhost:5000")
-mlflow.set_experiment("accident_severity_classification")
+mlflow.set_experiment("accident_severity_production")
 
 MODEL_NAME = "accident_severity_classifier"
 
