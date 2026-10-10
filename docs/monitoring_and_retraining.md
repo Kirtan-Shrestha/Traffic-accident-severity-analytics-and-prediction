@@ -113,3 +113,35 @@ The large train-vs-test Fatal-recall gap documented in Section 2.2 should be
 treated as an immediate retraining candidate rather than waiting for the
 6-month schedule trigger, since it indicates the current production model
 already underperforms on the rare, highest-cost class in later time periods.
+
+## 5. Qualitative Scenario Testing (Sanity Check)
+
+As a sanity check beyond the aggregate metrics in Section 2, five
+hand-constructed scenarios were sent to the live `/predict` endpoint,
+ranging from low-risk to high-risk conditions:
+
+| Scenario | Conditions | Predicted Severity |
+|---|---|---|
+| A | Urban, 20 mph, daylight, fine weather, 1 vehicle | Serious |
+| B | Rural, 60 mph, rain, evening, 2 vehicles | Slight |
+| C | Rural, 70 mph, fog, night, 3 vehicles | Slight |
+| D | Rural, snow + high winds, night, 2 vehicles | Slight |
+| E | Urban rush hour, rain + high winds, 4 vehicles | Slight |
+
+The model predicted its most severe outcome for the lowest-risk scenario
+(A) and predicted the mildest outcome (Slight) for every higher-risk
+scenario (B-E), including severe weather, high speed, night-time, and
+multi-vehicle conditions. A model with genuine risk sensitivity would be
+expected to show the opposite pattern.
+
+This is consistent with the overfitting finding in Section 2.2: the
+production model's predictions do not appear to track real-world risk
+factors in a generalizable way, likely driven by the severe class
+imbalance toward "Slight" severity in the training data causing the
+model to default to the majority class except in narrow regions of the
+feature space it memorized during training. This reinforces that the
+current production model should not be treated as reliable for
+risk-based decision-making, and is a priority candidate for retraining
+with stronger regularization and/or a different modeling approach (e.g.
+the better-generalizing class-weighted Logistic Regression baseline
+noted in Section 2.2) before any real-world use.
