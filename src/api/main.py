@@ -6,12 +6,13 @@ each request only needs to supply raw feature values.
 """
 import logging
 import os
+import time
 from contextlib import asynccontextmanager
 
 import lightgbm as lgb  # noqa: F401 - import before pandas/mlflow, see train_tree_models.py
 import mlflow
 import pandas as pd
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from mlflow.tracking import MlflowClient
 
 from src.api.schemas import AccidentFeatures, PredictionResponse
@@ -45,6 +46,26 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="Accident Severity Prediction API", version="1.0.0", lifespan=lifespan)
 
 
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    """
+    Logs every request's path, status code, and latency -- the basic
+    signal needed to monitor API performance, latency and failure rate
+    in production.
+    """
+    start = time.perf_counter()
+    try:
+        response = await call_next(request)
+        latency_ms = (time.perf_counter() - start) * 1000
+        logger.info(
+            f"request path={request.url.path} status={response.status_code} latency_ms={latency_ms:.1f}"
+        )
+        return response
+    except Exception:
+        latency_ms = (time.perf_counter() - start) * 1000
+        logger.exception(f"request path={request.url.path} FAILED latency_ms={latency_ms:.1f}")
+        raise
+    
 @app.get("/health")
 def health():
     return {
